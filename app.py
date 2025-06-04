@@ -119,16 +119,20 @@ def add_inventory():
     conn.close()
     return redirect('/')
 
-@app.route('/add_shop_item', methods=['POST'])
-def add_shop_item():
+@app.route('/add_shopitem', methods=['POST'])
+def add_shopitem():
     item_id = int(request.form['item_id'])
-    sell_price = int(request.form['sell_price'])
-    conn = get_db()
+    price = int(request.form['sell_price'])
+
+    conn = get_db()  # ✅ 获取连接对象
     existing = conn.execute('SELECT * FROM ShopItem WHERE ItemID=?', (item_id,)).fetchone()
+    
     if existing:
-        conn.execute('UPDATE ShopItem SET SellPrice=? WHERE ItemID=?', (sell_price, item_id))
+        # 如果存在则更新
+        conn.execute('UPDATE ShopItem SET SellPrice=? WHERE ItemID=?', (price, item_id))
     else:
-        conn.execute('INSERT INTO ShopItem (ItemID, SellPrice) VALUES (?, ?)', (item_id, sell_price))
+        # 否则新增
+        conn.execute('INSERT INTO ShopItem (ItemID, SellPrice) VALUES (?, ?)', (item_id, price))
     conn.commit()
     conn.close()
     return redirect('/')
@@ -333,23 +337,6 @@ def update_plot(id):
     conn.commit()
     conn.close()
     return '', 204
-    
-@app.route('/add_shopitem', methods=['POST'])
-def add_shopitem():
-    item_id = request.form['item_id']
-    price = request.form['sell_price']
-    # 校验 item_id 合法性
-    db.execute("INSERT INTO ShopItem (ItemID, SellPrice) VALUES (?, ?)", (item_id, price))
-    db.commit()
-    return redirect("/")
-
-@app.route('/add_villager', methods=['POST'])
-def add_villager():
-    name = request.form['name']
-    gender = request.form['gender']
-    db.execute("INSERT INTO Villager (Name, Gender) VALUES (?, ?)", (name, gender))
-    db.commit()
-    return redirect("/")
 
 import os
 if __name__ == "__main__":

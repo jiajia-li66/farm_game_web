@@ -1,0 +1,99 @@
+-- 玩家表
+CREATE TABLE IF NOT EXISTS Player (
+    PlayerID INTEGER PRIMARY KEY AUTOINCREMENT,
+    CurrentGold INTEGER NOT NULL DEFAULT 0
+);
+
+-- 物品表
+CREATE TABLE IF NOT EXISTS Item (
+    ItemID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ItemName TEXT NOT NULL UNIQUE,
+    Category TEXT NOT NULL,
+    Description TEXT
+);
+
+-- 植物表
+CREATE TABLE IF NOT EXISTS Plant (
+    PlantID INTEGER PRIMARY KEY AUTOINCREMENT,
+    PlantName TEXT NOT NULL UNIQUE,
+    BaseGrowthTime INTEGER NOT NULL,
+    WaterEffectPerTime INTEGER NOT NULL,
+    MaxWaterTimes INTEGER NOT NULL,
+    SeedPrice INTEGER NOT NULL,
+    SellPrice INTEGER NOT NULL,
+    HarvestYield INTEGER NOT NULL DEFAULT 1
+);
+
+-- 土地表
+CREATE TABLE IF NOT EXISTS Plot (
+    PlotID INTEGER PRIMARY KEY AUTOINCREMENT,
+    PlayerID INTEGER NOT NULL,
+    Status TEXT NOT NULL DEFAULT 'Empty',
+    PlantedPlantID INTEGER,
+    CurrentGrowthTimeLeft INTEGER,
+    TimesWatered INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
+    FOREIGN KEY (PlantedPlantID) REFERENCES Plant(PlantID)
+);
+
+-- 仓库表
+CREATE TABLE IF NOT EXISTS Inventory (
+    PlayerID INTEGER NOT NULL,
+    ItemID INTEGER NOT NULL,
+    Quantity INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (PlayerID, ItemID),
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+);
+
+-- 村民表
+CREATE TABLE IF NOT EXISTS Villager (
+    VillagerID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL,
+    Gender TEXT NOT NULL
+);
+
+-- 好感度表
+CREATE TABLE IF NOT EXISTS Affection (
+    PlayerID INTEGER NOT NULL,
+    VillagerID INTEGER NOT NULL,
+    AffectionLevel INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (PlayerID, VillagerID),
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
+    FOREIGN KEY (VillagerID) REFERENCES Villager(VillagerID)
+);
+
+-- 订单表（改名为 VillagerOrder）
+CREATE TABLE IF NOT EXISTS VillagerOrder (
+    OrderID INTEGER PRIMARY KEY AUTOINCREMENT,
+    VillagerID INTEGER NOT NULL,
+    RequiredItemID INTEGER NOT NULL,
+    RequiredQuantity INTEGER NOT NULL DEFAULT 1,
+    RewardGold INTEGER NOT NULL,
+    RewardAffection INTEGER NOT NULL DEFAULT 0,
+    Status TEXT NOT NULL DEFAULT 'Available',
+    PostedTime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ExpiryTime TEXT,
+    PlayerID INTEGER,
+    FOREIGN KEY (VillagerID) REFERENCES Villager(VillagerID),
+    FOREIGN KEY (RequiredItemID) REFERENCES Item(ItemID),
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID)
+);
+
+-- 金币交易记录表
+CREATE TABLE IF NOT EXISTS GoldTransaction (
+    TransactionID INTEGER PRIMARY KEY AUTOINCREMENT,
+    PlayerID INTEGER NOT NULL,
+    Timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Type TEXT NOT NULL,
+    Amount INTEGER NOT NULL,
+    SourceReference TEXT NOT NULL,
+    FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID)
+);
+
+-- 商店物品表
+CREATE TABLE IF NOT EXISTS ShopItem (
+    ItemID INTEGER PRIMARY KEY,
+    SellPrice INTEGER NOT NULL,
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+);

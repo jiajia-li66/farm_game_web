@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>种田养成游戏数据库</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: url("/static/R.jpg") no-repeat center center fixed;
+            background-size: cover;
+            font-family: "Segoe UI", sans-serif;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.93);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-left: 6px solid #ffc107;
+        }
+        .card-header {
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <h1 class="text-center text-white mb-4">🌾 种田养成游戏数据库</h1>
+
+    <!-- 示例模块：玩家 -->
+    <div class="card mb-4 p-3 border-success">
+        <div class="card-header bg-success text-white">👤 玩家管理</div>
+        <form id="player-form" class="row g-3">
+            <div class="col-auto">
+                <input class="form-control" name="gold" type="number" placeholder="初始金币" required>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-success" type="submit">添加玩家</button>
+            </div>
+        </form>
+
+        <div class="mt-3 mb-2 d-flex">
+            <input class="form-control me-2" id="player-search" placeholder="搜索PlayerID..." style="max-width: 200px;">
+            <button class="btn btn-outline-dark" onclick="loadPlayers()">搜索</button>
+        </div>
+
+    <ul id="player-list" class="mt-3 list-unstyled"></ul>
+    <nav>
+        <ul id="pagination" class="pagination pagination-sm"></ul>
+    </nav>
+</div>
+
+    <!-- 示例模块：物品 -->
+    <div class="card mb-4 p-3 border-primary">
+        <div class="card-header bg-primary text-white">📦 物品管理</div>
+        <form id="item-form" class="row g-3">
+            <div class="col-md-3"><input class="form-control" name="item_name" placeholder="名称" required></div>
+            <div class="col-md-3"><input class="form-control" name="category" placeholder="类别" required></div>
+            <div class="col-md-4"><input class="form-control" name="description" placeholder="描述"></div>
+            <div class="col-md-2"><button class="btn btn-primary" type="submit">添加物品</button></div>
+        </form>
+        <ul class="mt-3">
+            {% for i in items %}
+            <li>{{ i.ItemName }}（{{ i.Category }}）：{{ i.Description }}
+    <a href="#" class="text-primary ms-2" onclick="showEditForm('item', {{ i.ItemID }}, { ItemName: '{{ i.ItemName }}', Category: '{{ i.Category }}', Description: '{{ i.Description }}' })"><i class="fas fa-edit"></i></a>
+    <a href="#" class="text-danger ms-2" onclick="deleteEntry('item', {{ i.ItemID }})"><i class="fas fa-trash"></i></a>
+</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 示例模块：植物 -->
+    <div class="card mb-4 p-3 border-warning">
+        <div class="card-header bg-warning text-dark">🌱 植物管理</div>
+        <form id="plant-form" class="row g-2">
+            <div class="col-md-3"><input class="form-control" name="plant_name" placeholder="名称" required></div>
+            <div class="col-md-2"><input class="form-control" name="growth_time" type="number" placeholder="成熟时间" required></div>
+            <div class="col-md-2"><input class="form-control" name="water_effect" type="number" placeholder="浇水效果" required></div>
+            <div class="col-md-2"><input class="form-control" name="max_water" type="number" placeholder="最大浇水" required></div>
+            <div class="col-md-2"><input class="form-control" name="seed_price" type="number" placeholder="种子价格" required></div>
+            <div class="col-md-2"><input class="form-control" name="sell_price" type="number" placeholder="售价" required></div>
+            <div class="col-md-2"><input class="form-control" name="yield" type="number" placeholder="收获量" required></div>
+            <div class="col-md-2"><button class="btn btn-warning" type="submit">添加植物</button></div>
+        </form>
+    <ul class="mt-3">
+      {% for plant in plants %}
+      <li>
+        {{ plant.PlantName }}：成长 {{ plant.BaseGrowthTime }} 分钟，
+        浇水效果：{{ plant.WaterEffectPerTime }}，
+        最大浇水：{{ plant.MaxWaterTimes }} 次，
+        种子价格：{{ plant.SeedPrice }}，
+        售价：{{ plant.SellPrice }}，
+        收获量：{{ plant.HarvestYield }}
+        <a href="#" class="text-primary ms-2" onclick="showEditForm('plant', {{ plant.PlantID }}, {
+          PlantName: '{{ plant.PlantName }}',
+          BaseGrowthTime: {{ plant.BaseGrowthTime }},
+          WaterEffectPerTime: {{ plant.WaterEffectPerTime }},
+          MaxWaterTimes: {{ plant.MaxWaterTimes }},
+          SeedPrice: {{ plant.SeedPrice }},
+          SellPrice: {{ plant.SellPrice }},
+          HarvestYield: {{ plant.HarvestYield }}
+        })"><i class="fas fa-edit"></i></a>
+        <a href="#" class="text-danger ms-2" onclick="deleteEntry('plant', {{ plant.PlantID }})"><i class="fas fa-trash"></i></a>
+      </li>
+      {% endfor %}
+    </ul>
+    </div>
+
+
+    <!-- 订单模块 -->
+    <div class="card mb-4 p-3 border-dark">
+        <div class="card-header bg-dark text-white">📋 订单管理</div>
+        <form id="order-form" class="row g-2">
+            <div class="col-md-2"><input class="form-control" name="villager_id" placeholder="村民ID" required></div>
+            <div class="col-md-2"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
+            <div class="col-md-2"><input class="form-control" name="quantity" placeholder="数量" required></div>
+            <div class="col-md-2"><input class="form-control" name="reward" placeholder="金币奖励" required></div>
+            <div class="col-md-2"><input class="form-control" name="affection" placeholder="好感奖励" required></div>
+            <div class="col-md-2"><button class="btn btn-secondary" type="submit">添加订单</button></div>
+        </form>
+        <ul class="mt-3">
+            {% for o in orders %}
+            <li>订单 {{ o.OrderID }} - 村民{{ o.VillagerID }} 要 {{ o.RequiredQuantity }} × {{ o.RequiredItemID }}，奖励 {{ o.RewardGold }} 金币
+    <span class="badge bg-info">{{ o.Status }}</span>
+    <a href="/complete_order/{{ o.OrderID }}" class="text-success ms-2">完成</a>
+    <a href="#" class="text-primary ms-2" onclick="showEditForm('order', {{ o.OrderID }}, {
+        VillagerID: {{ o.VillagerID }},
+        RequiredItemID: {{ o.RequiredItemID }},
+        RequiredQuantity: {{ o.RequiredQuantity }},
+        RewardGold: {{ o.RewardGold }},
+        RewardAffection: {{ o.RewardAffection }},
+        Status: '{{ o.Status }}'
+    })"><i class="fas fa-edit"></i></a>
+    <a href="#" class="text-danger ms-2" onclick="deleteEntry('order', {{ o.OrderID }})"><i class="fas fa-trash"></i></a>
+</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 仓库模块 -->
+    <div class="card mb-4 p-3 border-info">
+        <div class="card-header bg-info text-white">📦 仓库管理</div>
+        <form id="inventory-form" class="row g-2">
+            <div class="col-md-3"><input class="form-control" name="player_id" placeholder="玩家ID" required></div>
+            <div class="col-md-3"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
+            <div class="col-md-3"><input class="form-control" name="quantity" placeholder="数量" required></div>
+            <div class="col-md-3"><button class="btn btn-info" type="submit">添加到仓库</button></div>
+        </form>
+        <ul class="mt-3">
+            {% for inv in inventory %}
+            <li>玩家{{ inv.PlayerID }}：物品{{ inv.ItemID }} × {{ inv.Quantity }}
+    <a href="#" class="text-primary ms-2" onclick="showEditForm('inventory', '{{ inv.PlayerID }}_{{ inv.ItemID }}', { Quantity: {{ inv.Quantity }} })"><i class="fas fa-edit"></i></a>
+    <a href="#" class="text-danger ms-2" onclick="deleteEntry('inventory', '{{ inv.PlayerID }}_{{ inv.ItemID }}')"><i class="fas fa-trash"></i></a>
+</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 商店模块 -->
+    <div class="card mb-4 p-3 border-danger">
+        <div class="card-header bg-danger text-white">🏪 商店管理</div>
+        <form id="shop-form" class="row g-2">
+            <div class="col-md-6"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
+            <div class="col-md-4"><input class="form-control" name="sell_price" placeholder="售价" required></div>
+            <div class="col-md-2"><button class="btn btn-danger" type="submit">上架商品</button></div>
+        </form>
+        <ul class="mt-3">
+            {% for s in shop_items %}
+            <li>物品{{ s.ItemID }}：售价 {{ s.SellPrice }} 金币
+    <a href="#" class="text-primary ms-2" onclick="showEditForm('shopitem', {{ s.ItemID }}, { SellPrice: {{ s.SellPrice }} })"><i class="fas fa-edit"></i></a>
+    <a href="#" class="text-danger ms-2" onclick="deleteEntry('shopitem', {{ s.ItemID }})"><i class="fas fa-trash"></i></a>
+</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 村民模块 -->
+    <div class="card mb-4 p-3 border-secondary">
+        <div class="card-header bg-secondary text-white">🧑 村民管理</div>
+        <form id="villager-form" class="row g-2">
+            <div class="col-md-6"><input class="form-control" name="name" placeholder="姓名" required></div>
+            <div class="col-md-4"><input class="form-control" name="gender" placeholder="性别" required></div>
+            <div class="col-md-2"><button class="btn btn-secondary" type="submit">添加村民</button></div>
+        </form>
+        <ul class="mt-3">
+            {% for v in villagers %}
+            <li>{{ v.Name }}（{{ v.Gender }}）
+    <a href="#" class="text-primary ms-2" onclick="showEditForm('villager', {{ v.VillagerID }}, { Name: '{{ v.Name }}', Gender: '{{ v.Gender }}' })"><i class="fas fa-edit"></i></a>
+    <a href="#" class="text-danger ms-2" onclick="deleteEntry('villager', {{ v.VillagerID }})"><i class="fas fa-trash"></i></a>
+</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 地块展示 -->
+    <div class="card mb-4 p-3 border-light">
+        <div class="card-header bg-light">🌾 地块展示</div>
+        <div class="row row-cols-4 g-3">
+            {% for plot in plots %}
+            <div class="col">
+                <div class="border rounded p-2 text-center" style="background-color: {% if plot.Status == 'Empty' %}#f8f9fa{% elif plot.Status == 'Growing' %}#e0ffe0{% elif plot.Status == 'Harvestable' %}#fff3cd{% else %}#dee2e6{% endif %};">
+                    <div class="fw-bold">地块 {{ plot.PlotID }}</div>
+                    玩家：{{ plot.PlayerID }}<br>
+                    状态：{{ plot.Status }}<br>
+                    植物：{{ plot.PlantedPlantID or '无' }}
+                    <a href="#" class="text-primary d-block mt-1" onclick="showEditForm('plot', {{ plot.PlotID }}, {
+    PlayerID: {{ plot.PlayerID }},
+    Status: '{{ plot.Status }}',
+    PlantedPlantID: {{ plot.PlantedPlantID or 'null' }}
+})">编辑</a>
+<a href="#" class="text-danger d-block" onclick="deleteEntry('plot', {{ plot.PlotID }})">删除</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- 通用编辑模态框 -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">修改数据</h5></div>
+    <div class="modal-body">
+      <form id="edit-form"></form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+      <button class="btn btn-primary" onclick="submitEditForm()">保存修改</button>
+    </div>
+  </div></div>
+</div>
+
+<script>
+let currentEditType = '', currentEditId = '';
+
+function deleteEntry(type, id) {
+    if (!confirm("确认删除此条记录？")) return;
+    fetch(`/delete_${type}/${id}`).then(() => location.reload());
+}
+
+function showEditForm(type, id, fields) {
+    currentEditType = type;
+    currentEditId = id;
+    const form = document.getElementById('edit-form');
+    form.innerHTML = '';
+    for (const key in fields) {
+        form.innerHTML += `<div class="mb-3">
+            <label class="form-label">${key}</label>
+            <input class="form-control" name="${key}" value="${fields[key]}" required>
+        </div>`;
+    }
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+function submitEditForm() {
+    const form = document.getElementById('edit-form');
+    const data = {};
+    new FormData(form).forEach((value, key) => data[key] = value);
+    fetch(`/update_${currentEditType}/${currentEditId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(res => res.ok ? location.reload() : alert('修改失败'));
+}
+
+function setupFormValidation(formId, requiredNames) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener("submit", function(e) {
+        for (const name of requiredNames) {
+            const input = this.querySelector(`[name='${name}']`);
+            if (input && !input.value.trim()) {
+                e.preventDefault();
+                alert(`请输入 ${name} 字段`);
+                return;
+            }
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupFormValidation("order-form", ["villager_id", "item_id", "quantity", "reward", "affection"]);
+    setupFormValidation("inventory-form", ["player_id", "item_id", "quantity"]);
+    setupFormValidation("shop-form", ["item_id", "sell_price"]);
+    setupFormValidation("villager-form", ["name", "gender"]);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadPlayers();
+    setupFormValidation("player-form", ["gold"]);
+});
+
+document.getElementById("player-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch('/add_player', {
+        method: 'POST',
+        body: formData
+    }).then(() => {
+        this.reset();
+        loadPlayers(currentPage);
+    });
+});
+
+function loadPlayers(page = 1) {
+    currentPage = page;
+    const query = document.getElementById("player-search").value;
+    fetch(`/api/players?page=${page}&q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById("player-list");
+            list.innerHTML = '';
+            for (const p of data.players) {
+                list.innerHTML += `<li>ID: ${p.PlayerID}, 金币: ${p.CurrentGold}
+                    <a href="#" class="text-primary ms-2" onclick="showEditForm('player', ${p.PlayerID}, { gold: ${p.CurrentGold} })"><i class="fas fa-edit"></i></a>
+                    <a href="#" class="text-danger ms-2" onclick="deleteEntry('player', ${p.PlayerID})"><i class="fas fa-trash"></i></a>
+                </li>`;
+            }
+
+            const pagination = document.getElementById("pagination");
+            const totalPages = Math.ceil(data.total / 5);
+            pagination.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `<li class="page-item ${i === page ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadPlayers(${i})">${i}</a>
+                </li>`;
+            }
+        });
+}
+
+</script>
+</body>
+</html>

@@ -37,7 +37,7 @@
     <!-- 示例模块：玩家 -->
     <div class="card mb-4 p-3 border-success">
         <div class="card-header bg-success text-white">👤 玩家管理</div>
-        <form id="player-form" class="row g-3">
+        <form id="item-form" class="row g-3" method="POST" action="/add_item">
             <div class="col-auto">
                 <input class="form-control" name="gold" type="number" placeholder="初始金币" required>
             </div>
@@ -60,7 +60,7 @@
     <!-- 示例模块：物品 -->
     <div class="card mb-4 p-3 border-primary">
         <div class="card-header bg-primary text-white">📦 物品管理</div>
-        <form id="item-form" class="row g-3">
+        <form id="item-form" class="row g-3" method="POST" action="/add_item">
             <div class="col-md-3"><input class="form-control" name="item_name" placeholder="名称" required></div>
             <div class="col-md-3"><input class="form-control" name="category" placeholder="类别" required></div>
             <div class="col-md-4"><input class="form-control" name="description" placeholder="描述"></div>
@@ -79,7 +79,7 @@
     <!-- 示例模块：植物 -->
     <div class="card mb-4 p-3 border-warning">
         <div class="card-header bg-warning text-dark">🌱 植物管理</div>
-        <form id="plant-form" class="row g-2">
+        <form id="item-form" class="row g-3" method="POST" action="/add_item">
             <div class="col-md-3"><input class="form-control" name="plant_name" placeholder="名称" required></div>
             <div class="col-md-2"><input class="form-control" name="growth_time" type="number" placeholder="成熟时间" required></div>
             <div class="col-md-2"><input class="form-control" name="water_effect" type="number" placeholder="浇水效果" required></div>
@@ -117,7 +117,7 @@
     <!-- 订单模块 -->
     <div class="card mb-4 p-3 border-dark">
         <div class="card-header bg-dark text-white">📋 订单管理</div>
-        <form id="order-form" class="row g-2">
+        <form id="item-form" class="row g-3" method="POST" action="/add_item">
             <div class="col-md-2"><input class="form-control" name="villager_id" placeholder="村民ID" required></div>
             <div class="col-md-2"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
             <div class="col-md-2"><input class="form-control" name="quantity" placeholder="数量" required></div>
@@ -147,7 +147,7 @@
     <!-- 仓库模块 -->
     <div class="card mb-4 p-3 border-info">
         <div class="card-header bg-info text-white">📦 仓库管理</div>
-        <form id="inventory-form" class="row g-2">
+        <form id="item-form" class="row g-3" method="POST" action="/add_item">
             <div class="col-md-3"><input class="form-control" name="player_id" placeholder="玩家ID" required></div>
             <div class="col-md-3"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
             <div class="col-md-3"><input class="form-control" name="quantity" placeholder="数量" required></div>

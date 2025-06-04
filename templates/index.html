@@ -166,11 +166,22 @@
     <!-- 商店模块 -->
     <div class="card mb-4 p-3 border-danger">
         <div class="card-header bg-danger text-white">🏪 商店管理</div>
-        <form id="shop-form" class="row g-2">
-            <div class="col-md-6"><input class="form-control" name="item_id" placeholder="物品ID" required></div>
-            <div class="col-md-4"><input class="form-control" name="sell_price" placeholder="售价" required></div>
-            <div class="col-md-2"><button class="btn btn-danger" type="submit">上架商品</button></div>
+        <form id="shop-form" class="row g-2" method="POST" action="/add_shopitem">
+          <div class="col-md-6">
+            <option value="">请选择物品</option>
+              {% for item in items %}
+                <option value="{{ item.ItemID }}">{{ item.ItemName }}</option>
+              {% endfor %}
+            </select>
+           </div>
+          <div class="col-md-4">
+            <input class="form-control" name="sell_price" placeholder="售价" required>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-danger" type="submit">上架商品</button>
+          </div>
         </form>
+
         <ul class="mt-3">
             {% for s in shop_items %}
             <li>物品{{ s.ItemID }}：售价 {{ s.SellPrice }} 金币
@@ -184,10 +195,20 @@
     <!-- 村民模块 -->
     <div class="card mb-4 p-3 border-secondary">
         <div class="card-header bg-secondary text-white">🧑 村民管理</div>
-        <form id="villager-form" class="row g-2">
-            <div class="col-md-6"><input class="form-control" name="name" placeholder="姓名" required></div>
-            <div class="col-md-4"><input class="form-control" name="gender" placeholder="性别" required></div>
-            <div class="col-md-2"><button class="btn btn-secondary" type="submit">添加村民</button></div>
+        <form id="villager-form" class="row g-2" method="POST" action="/add_villager">
+          <div class="col-md-6">
+            <input class="form-control" name="name" placeholder="姓名" required>
+          </div>
+          <div class="col-md-4">
+            <select class="form-control" name="gender" required>
+              <option value="">选择性别</option>
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-secondary" type="submit">添加村民</button>
+          </div>
         </form>
         <ul class="mt-3">
             {% for v in villagers %}

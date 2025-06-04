@@ -333,7 +333,23 @@ def update_plot(id):
     conn.commit()
     conn.close()
     return '', 204
+    
+@app.route('/add_shopitem', methods=['POST'])
+def add_shopitem():
+    item_id = request.form['item_id']
+    price = request.form['sell_price']
+    # 校验 item_id 合法性
+    db.execute("INSERT INTO ShopItem (ItemID, SellPrice) VALUES (?, ?)", (item_id, price))
+    db.commit()
+    return redirect("/")
 
+@app.route('/add_villager', methods=['POST'])
+def add_villager():
+    name = request.form['name']
+    gender = request.form['gender']
+    db.execute("INSERT INTO Villager (Name, Gender) VALUES (?, ?)", (name, gender))
+    db.commit()
+    return redirect("/")
 
 import os
 if __name__ == "__main__":

@@ -75,6 +75,8 @@ def register():
 
 from werkzeug.security import check_password_hash  # 确保已经导入
 
+from werkzeug.security import check_password_hash
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -83,11 +85,11 @@ def login():
         conn = get_db()
         cursor = conn.cursor()
 
-        # 只通过用户名查询
+        # 查询用户信息（只根据用户名）
         user = cursor.execute("SELECT * FROM User WHERE Username=?", (username,)).fetchone()
         conn.close()
 
-        # 用 check_password_hash 验证
+        # 验证密码哈希
         if user and check_password_hash(user['Password'], password):
             session['user_id'] = user['UserID']
             session['username'] = user['Username']
@@ -99,7 +101,9 @@ def login():
                 return redirect(url_for('player_dashboard'))
         else:
             flash('用户名或密码错误', 'danger')
+
     return render_template('login.html')
+
 
 
 

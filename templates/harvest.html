@@ -1,0 +1,14 @@
+<div class="my-3">
+    <h4>🌾 收获作物</h4>
+    {% set ready_plots = plots | selectattr("Status", "equalto", "Ready") | list %}
+    {% if ready_plots %}
+        <form action="{{ url_for('harvest') }}" method="post">
+            <button type="submit" class="btn btn-success">收获全部</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning mt-2">
+            当前没有可收获的作物，请耐心等待。
+        </div>
+        <button class="btn btn-secondary" disabled>暂无可收获作物</button>
+    {% endif %}
+</div>

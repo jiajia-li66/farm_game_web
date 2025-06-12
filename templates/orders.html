@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>村民订单</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h3 class="mb-4">📜 村民订单</h3>
+    <p>当前金币：<strong class="text-success">{{ player['CurrentGold'] }}</strong></p>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>村民</th>
+            <th>所需物品</th>
+            <th>数量</th>
+            <th>金币奖励</th>
+            <th>好感奖励</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order['VillagerName'] }}</td>
+            <td>{{ order['ItemName'] }}</td>
+            <td>{{ order['RequiredQuantity'] }}</td>
+            <td>{{ order['RewardGold'] }}</td>
+            <td>{{ order['RewardAffection'] }}</td>
+            <td>
+                <form method="post" action="{{ url_for('complete_order', order_id=order['OrderID']) }}">
+                    <button type="submit" class="btn btn-success btn-sm">完成</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('player_dashboard') }}" class="btn btn-secondary">返回主页</a>
+</div>
+</body>
+</html>

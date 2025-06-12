@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>玩家主页</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("{{ url_for('static', filename='bg.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: "Segoe UI", sans-serif;
+        }
+        .content {
+            max-width: 900px;
+            margin: 50px auto;
+            background-color: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="d-flex justify-content-between align-items-center p-3">
+  <h2>欢迎玩家 {{ session['username'] }}！</h2>
+  <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">退出登录</a>
+</div>
+
+<div class="content">
+    <h2 class="mb-4">欢迎玩家 {{ session['username'] }}</h2>
+    <h4>当前金币：<span class="text-success">{{ player['CurrentGold'] }}</span></h4>
+
+    <hr>
+    <h5>📦 仓库物品</h5>
+    <ul class="list-group mb-4">
+        {% for item in inventory %}
+        <li class="list-group-item d-flex justify-content-between">
+            {{ item['ItemName'] }}
+            <span class="badge bg-primary rounded-pill">{{ item['Quantity'] }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item">暂无物品</li>
+        {% endfor %}
+    </ul>
+
+    <h5>🏡 拥有土地</h5>
+    <ul class="list-group">
+        {% for plot in plots %}
+        <li class="list-group-item">
+            土地编号 #{{ plot['PlotID'] }} - 状态: {{ plot['Status'] }}
+            {% if plot['PlantedPlantID'] %}
+            ，种植植物 ID: {{ plot['PlantedPlantID'] }}
+            ，剩余时间: {{ plot['CurrentGrowthTimeLeft'] }}
+            {% endif %}
+	    {% if plot['Status'] == 'Growing' %}
+	    <form method="post" action="{{ url_for('water', plot_id=plot['PlotID']) }}">
+    	    <button class="btn btn-sm btn-info mt-1">💧 浇水</button>
+	    </form>
+	    <form method="post" action="{{ url_for('next_day') }}">
+    	         <button class="btn btn-warning mb-3">🌞 下一天（推进作物成长）</button>
+	    </form>
+	    {% endif %}
+        </li>
+        {% else %}
+        <li class="list-group-item">暂无土地</li>
+        {% endfor %}
+    </ul>
+    <div class="mt-4 text-center">
+         <a href="{{ url_for('plant') }}" class="btn btn-outline-success">🌱 前往种植作物</a>
+	 <a href="{{ url_for('harvest') }}" class="btn btn-outline-primary">前往收获作物</a>
+	 <a href="{{ url_for('shop') }}" class="btn btn-outline-success">前往商店</a>
+	 <a href="{{ url_for('view_orders') }}" class="btn btn-outline-primary">查看村民订单</a>
+    </div>
+
+</div>
+</body>
+</html>

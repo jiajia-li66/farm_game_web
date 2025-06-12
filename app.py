@@ -73,7 +73,6 @@ def register():
 
     return render_template('register.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -82,19 +81,20 @@ def login():
         conn = get_db()
         cursor = conn.cursor()
         user = cursor.execute("SELECT * FROM User WHERE Username=? AND Password=?", (username, password)).fetchone()
-        print(f"[DEBUG] 登录尝试: 用户名={username}, 密码={password}, 匹配结果={user}")
         conn.close()
+
         if user:
             session['user_id'] = user['UserID']
             session['username'] = user['Username']
             session['role'] = user['Role']
             flash('登录成功！', 'success')
-            return redirect(url_for('admin_dashboard') if user['Role'] == 'admin' else url_for('player_dashboard'))
+            if user['Role'] == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('player_dashboard'))
         else:
             flash('用户名或密码错误', 'danger')
     return render_template('login.html')
-
-
 
 
 @app.route('/logout')

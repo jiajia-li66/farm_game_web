@@ -79,24 +79,21 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
         conn = get_db()
-        user = conn.execute("SELECT * FROM User WHERE Username=?", (username,)).fetchone()
+        cursor = conn.cursor()
+        user = cursor.execute("SELECT * FROM User WHERE Username=? AND Password=?", (username, password)).fetchone()
+        print(f"[DEBUG] 登录尝试: 用户名={username}, 密码={password}, 匹配结果={user}")
         conn.close()
-
-        if user and check_password_hash(user['Password'], password):
+        if user:
             session['user_id'] = user['UserID']
+            session['username'] = user['Username']
             session['role'] = user['Role']
-            flash('登录成功', 'success')
-
-            if user['Role'] == 'admin':
-                return redirect(url_for('admin_dashboard'))
-            else:
-                return redirect(url_for('player_dashboard'))
+            flash('登录成功！', 'success')
+            return redirect(url_for('admin_dashboard') if user['Role'] == 'admin' else url_for('player_dashboard'))
         else:
             flash('用户名或密码错误', 'danger')
-
     return render_template('login.html')
+
 
 
 

@@ -1,6 +1,11 @@
 services:
   - type: web
-    name: farm-game-web
+    name: farm-game
     env: python
-    buildCommand: ""
-    startCommand: python app.py
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: DATABASE_URL
+        value: "sqlite:///farm_game.db"
+    autoDeploy: true

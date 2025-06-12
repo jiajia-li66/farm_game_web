@@ -1,4 +1,5 @@
--- ÓÃ»§±í£¨ÓÃÓÚ×¢²áµÇÂ¼£©
+
+-- ç”¨æˆ·è¡¨
 CREATE TABLE IF NOT EXISTS User (
     UserID INTEGER PRIMARY KEY AUTOINCREMENT,
     Username TEXT UNIQUE NOT NULL,
@@ -6,7 +7,7 @@ CREATE TABLE IF NOT EXISTS User (
     Role TEXT CHECK(Role IN ('player', 'admin')) NOT NULL DEFAULT 'player'
 );
 
--- Íæ¼Ò±í£¨ÓëUserÒ»¶ÔÒ»°ó¶¨£©
+-- çŽ©å®¶è¡¨
 CREATE TABLE IF NOT EXISTS Player (
     PlayerID INTEGER PRIMARY KEY AUTOINCREMENT,
     CurrentGold INTEGER NOT NULL DEFAULT 0,
@@ -14,40 +15,38 @@ CREATE TABLE IF NOT EXISTS Player (
     FOREIGN KEY (UserID) REFERENCES User(UserID)
 );
 
--- ÎïÆ·±í
+-- ç‰©å“è¡¨
 CREATE TABLE IF NOT EXISTS Item (
     ItemID INTEGER PRIMARY KEY AUTOINCREMENT,
     ItemName TEXT NOT NULL UNIQUE,
-    Category TEXT NOT NULL,
+    ItemType TEXT NOT NULL,
     Description TEXT
 );
 
--- Ö²Îï±í
+-- æ¤ç‰©è¡¨
 CREATE TABLE IF NOT EXISTS Plant (
     PlantID INTEGER PRIMARY KEY AUTOINCREMENT,
     PlantName TEXT NOT NULL UNIQUE,
     BaseGrowthTime INTEGER NOT NULL,
     WaterEffectPerTime INTEGER NOT NULL,
     MaxWaterTimes INTEGER NOT NULL,
-    SeedPrice INTEGER NOT NULL,
     SellPrice INTEGER NOT NULL,
     HarvestYield INTEGER NOT NULL DEFAULT 1
 );
 
--- ÍÁµØ±í
+-- åœŸåœ°è¡¨
 CREATE TABLE IF NOT EXISTS Plot (
-    PlotID INTEGER PRIMARY KEY AUTOINCREMENT,           -- µØ¿éID
-    PlayerID INTEGER NOT NULL,                          -- ËùÊôÍæ¼Ò
-    Status TEXT NOT NULL DEFAULT 'Empty',               -- ×´Ì¬£ºEmpty/Growing/Ready
-    PlantedPlantID INTEGER,                             -- µ±Ç°ÖÖÖ²µÄ×÷Îï£¨¶ÔÓ¦ Plant ±í£©
-    CurrentGrowthTimeLeft INTEGER,                      -- Ê£ÓàÉú³¤Ê±¼ä£¨ÓÉ BaseGrowthTime ¾ö¶¨£©
-    TimesWatered INTEGER NOT NULL DEFAULT 0,            -- ½½Ë®´ÎÊý
+    PlotID INTEGER PRIMARY KEY AUTOINCREMENT,
+    PlayerID INTEGER NOT NULL,
+    Status TEXT NOT NULL DEFAULT 'Empty',
+    PlantedPlantID INTEGER,
+    CurrentGrowthTimeLeft INTEGER,
+    TimesWatered INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
     FOREIGN KEY (PlantedPlantID) REFERENCES Plant(PlantID)
 );
 
-
--- ²Ö¿â±í£¨Íæ¼Ò ¡Á ÎïÆ·£©
+-- ä»“åº“è¡¨
 CREATE TABLE IF NOT EXISTS Inventory (
     PlayerID INTEGER NOT NULL,
     ItemID INTEGER NOT NULL,
@@ -57,15 +56,15 @@ CREATE TABLE IF NOT EXISTS Inventory (
     FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
 );
 
--- ´åÃñ±í
+-- æ‘æ°‘è¡¨
 CREATE TABLE IF NOT EXISTS Villager (
     VillagerID INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name TEXT NOT NULL,
+    VillagerName TEXT NOT NULL,
     Gender TEXT NOT NULL,
     Description TEXT
 );
 
--- ºÃ¸Ð¶È±í
+-- å¥½æ„Ÿåº¦è¡¨
 CREATE TABLE IF NOT EXISTS Affection (
     PlayerID INTEGER NOT NULL,
     VillagerID INTEGER NOT NULL,
@@ -75,7 +74,7 @@ CREATE TABLE IF NOT EXISTS Affection (
     FOREIGN KEY (VillagerID) REFERENCES Villager(VillagerID)
 );
 
--- ´åÃñ¶©µ¥±í£¨¹²ÓÃ£©
+-- æ‘æ°‘è®¢å•è¡¨
 CREATE TABLE IF NOT EXISTS VillagerOrder (
     OrderID INTEGER PRIMARY KEY AUTOINCREMENT,
     VillagerID INTEGER NOT NULL,
@@ -90,53 +89,49 @@ CREATE TABLE IF NOT EXISTS VillagerOrder (
     FOREIGN KEY (RequiredItemID) REFERENCES Item(ItemID)
 );
 
-
--- ½ð±Ò½»Ò×¼ÇÂ¼±í
+-- é‡‘å¸äº¤æ˜“è®°å½•
 CREATE TABLE IF NOT EXISTS GoldTransaction (
     TransactionID INTEGER PRIMARY KEY AUTOINCREMENT,
     PlayerID INTEGER NOT NULL,
     Timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    Type TEXT NOT NULL,  -- Income / Expense
+    Type TEXT NOT NULL,
     Amount INTEGER NOT NULL,
     SourceReference TEXT NOT NULL,
     FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID)
 );
 
--- ÉÌµêÖÐ¿É¹ºÂòÎïÆ·
+-- å•†åº—ç‰©å“
 CREATE TABLE IF NOT EXISTS ShopItem (
     ItemID INTEGER PRIMARY KEY,
     SellPrice INTEGER NOT NULL,
     FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
 );
 
-INSERT INTO Item (ItemName, Category, Description) VALUES 
-('ÂÜ²·ÖÖ×Ó', 'ÖÖ×Ó', 'ÓÃÓÚÖÖÖ²ÂÜ²·'),
-('ºúÂÜ²·', '×÷Îï', '³ÉÊìºóµÄÂÜ²·'),
-('Ë®µÎ', '²ÄÁÏ', 'ÓÃÓÚ½½Ë®');
+-- æ•°æ®æ’å…¥
+INSERT INTO Item (ItemName, ItemType, Description) VALUES 
+('èåœç§å­', 'ç§å­', 'ç”¨äºŽç§æ¤èåœ'),
+('èåœ', 'ä½œç‰©', 'æˆç†ŸåŽçš„èåœ'),
+('å°éº¦', 'ä½œç‰©', 'æˆç†ŸåŽçš„å°éº¦'),
+('æ°´æ»´', 'ææ–™', 'ç”¨äºŽæµ‡æ°´');
 
-INSERT INTO Plant (PlantName, BaseGrowthTime, WaterEffectPerTime, MaxWaterTimes, SeedPrice, SellPrice, HarvestYield) VALUES
-('ÂÜ²·', 60, 10, 3, 5, 15, 1),
-('ºúÂÜ²·', 90, 15, 2, 8, 20, 1),
-('Ð¡Âó', 70, 13, 3, 6, 18, 1);
+INSERT INTO Plant (PlantName, BaseGrowthTime, WaterEffectPerTime, MaxWaterTimes,  SellPrice, HarvestYield) VALUES
+('èåœ', 60, 10, 3, 15, 1),
+('èƒ¡èåœ', 90, 15, 8, 20, 1),
+('å°éº¦', 70, 13, 6, 18, 1);
 
--- Ìí¼Ó´åÃñ
-INSERT INTO Villager (Name, Gender, Description) VALUES
-('Ð¡·¼', 'Å®', 'ÈÈÇéµÄ´å»¨£¬Ï£ÍûÓÐÈË°ïËýÊÕ¼¯ÂÜ²·'),
-('ÀÏÕÅ', 'ÄÐ', '¾­Ñé·á¸»µÄÅ©Ãñ£¬ÕýÔÚÑ°ÕÒÐ¡Âó');
+INSERT INTO Villager (VillagerName, Gender, Description) VALUES
+('å°èŠ³', 'å¥³', 'çƒ­æƒ…çš„æ‘èŠ±ï¼Œå¸Œæœ›æœ‰äººå¸®å¥¹æ”¶é›†èåœ'),
+('è€å¼ ', 'ç”·', 'ç»éªŒä¸°å¯Œçš„å†œæ°‘ï¼Œæ­£åœ¨å¯»æ‰¾å°éº¦');
 
-
--- Ìí¼Ó´åÃñ¶©µ¥£¨ÎïÆ·ID ÄãÒª¸ù¾ÝÊµ¼Ê Item ±íÖÐµÄ ID ¶ÔÓ¦£©
 INSERT INTO VillagerOrder (VillagerID, RequiredItemID, RequiredQuantity, RewardGold, RewardAffection) VALUES
-(1, 1, 5, 50, 5),   -- Ð¡·¼Òª5¸öÂÜ²·£¬¸ø50½ð±Ò+5ºÃ¸Ð
-(2, 2, 3, 70, 8);   -- ÀÏÕÅÒª3¸öÐ¡Âó£¬¸ø70½ð±Ò+8ºÃ¸Ð
+(1, 2, 5, 50, 5),  -- å°èŠ³è¦5ä¸ªèåœ
+(2, 3, 3, 70, 8);  -- è€å¼ è¦3ä¸ªå°éº¦
 
-
--- ¼ÙÉèÂÜ²·ÖÖ×Ó¡¢Ë®µÎ¿ÉÒÔ±»Íæ¼Ò¹ºÂò
 INSERT INTO ShopItem (ItemID, SellPrice)
-SELECT ItemID, 5 FROM Item WHERE ItemName = 'ÂÜ²·ÖÖ×Ó'
+SELECT ItemID, 5 FROM Item WHERE ItemName = 'èåœç§å­'
 UNION ALL
-SELECT ItemID, 2 FROM Item WHERE ItemName = 'Ë®µÎ';
+SELECT ItemID, 2 FROM Item WHERE ItemName = 'æ°´æ»´';
 
 INSERT INTO User (Username, Password, Role) VALUES 
-('admin', 'admin123', 'admin'),
+('admin', '123', 'admin'),
 ('player1', '123456', 'player');

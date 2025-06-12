@@ -73,6 +73,8 @@ def register():
 
     return render_template('register.html')
 
+from werkzeug.security import check_password_hash  # 确保已经导入
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -80,10 +82,13 @@ def login():
         password = request.form['password']
         conn = get_db()
         cursor = conn.cursor()
-        user = cursor.execute("SELECT * FROM User WHERE Username=? AND Password=?", (username, password)).fetchone()
+
+        # 只通过用户名查询
+        user = cursor.execute("SELECT * FROM User WHERE Username=?", (username,)).fetchone()
         conn.close()
 
-        if user:
+        # 用 check_password_hash 验证
+        if user and check_password_hash(user['Password'], password):
             session['user_id'] = user['UserID']
             session['username'] = user['Username']
             session['role'] = user['Role']
@@ -95,6 +100,7 @@ def login():
         else:
             flash('用户名或密码错误', 'danger')
     return render_template('login.html')
+
 
 
 @app.route('/logout')
